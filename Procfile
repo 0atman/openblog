@@ -1,1 +1,1 @@
-web: openblog
+web: ./openblog
