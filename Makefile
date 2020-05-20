@@ -1,5 +1,5 @@
 build:
-	nimble build --passL: -static -d:ssl openblog.nim
+	nimble build --passL: -static -d:release openblog.nim
 
 run: build
 	./openblog
