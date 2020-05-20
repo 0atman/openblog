@@ -1,4 +1,5 @@
 import jester
+discard """
 import asyncdispatch
 import os
 import strutils
@@ -6,7 +7,6 @@ import htmlgen
 import json
 import strformat
 import tables
-
 
 const jsonlist = staticRead "list.json"
 let bloglist = parseJson(jsonlist)["blogs"]
@@ -56,14 +56,14 @@ func tagPage(tagname: string, tags: Table[string, seq[JsonNode]]): string =
       header(h1(tagname)),
       blogList.join "\n",
   ))
-
+"""
 
 routes:
   get "/":
-    resp index(tags)
+    resp "hi" #index(tags)
   get "/tag/@tagname":
-    resp tagPage(@"tagname", tags)
+    resp @"tagname" #tagPage(@"tagname", tags)
   get "/list.json":
-    resp bloglist
+    resp "hi" #bloglist
 
 runForever()
