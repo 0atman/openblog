@@ -5,6 +5,7 @@ import strutils
 import htmlgen
 import json
 import strformat
+import FeedNim
 import tables
 
 
@@ -15,6 +16,8 @@ var tags = initTable[string, seq[JsonNode]]()
 
 echo "checking blog list..."
 for blog in bloglist:
+  discard getRSS blog["rss"].getStr
+
   for rawTag in blog["tags"]:
     let tag = rawTag.getStr.toLowerAscii.replace(" ", "-")
     if tags.contains(tag):
