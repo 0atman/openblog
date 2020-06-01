@@ -40,7 +40,7 @@ func index(tags: Table[string, seq[JsonNode]]): string =
     head(link(rel="stylesheet", href="https://newcss.net/new.min.css")),
     body(
       header(h1("Open Blog Directory")),
-      tagLinks.join("\n")))
+      tagLinks.join("</br>")))
 
 var titles: seq[string]
 for blog in bloglist:
@@ -52,7 +52,7 @@ func tagPage(tagname: string, tags: Table[string, seq[JsonNode]]): string =
     return "no blogs with that tag"
   var blogList: seq[string]
   for blog in tags[tagname]:
-    blogList.add li(blog["name"].getStr)
+    blogList.add li(a(href=blog["url"].getStr, blog["name"].getStr))
   html(
     head(link(rel="stylesheet", href="https://newcss.net/new.min.css")),
     body(
