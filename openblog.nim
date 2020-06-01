@@ -3,35 +3,38 @@ import asyncdispatch
 import os
 import strutils
 import htmlgen
-import json
 import strformat
 import FeedNim
 import tables
+import yaml, streams
 
+type Blog = object
+  name: string
+  url: string
+  rss: string
+  tags: seq[string]
 
-const jsonlist = staticRead "list.json"
-let bloglist = parseJson(jsonlist)["blogs"]
+proc loadBlogs(filename: string): seq[Blog] =
+  var yamlStream = newFileStream filename
+  yamlStream.load result
+  yamlStream.close
 
-var tags = initTable[string, seq[JsonNode]]()
+proc makeAndCheckTags(blogs: seq[Blog]): Table[string, seq[Blog]] =
+  var tags = initTable[string, seq[Blog]]()
+  echo "checking blog list..."
+  for blog in blogs:
+    discard getRSS blog.rss
 
-echo "checking blog list..."
-for blog in bloglist:
-  discard getRSS blog["rss"].getStr
+    for rawTag in blog.tags:
+      let tag = rawTag.toLowerAscii.replace(" ", "-")
+      if tag in tags:
+        tags[tag].add blog
+      else:
+        tags[tag] = @[blog]
+  echo fmt"...{blogs.len} blogs loaded!"
+  return tags
 
-  for rawTag in blog["tags"]:
-    let tag = rawTag.getStr.toLowerAscii.replace(" ", "-")
-    if tags.contains(tag):
-      tags[tag].add blog
-    else:
-      tags[tag] = @[blog]
-
-echo fmt"...{bloglist.len} blogs loaded!"
-var settings = newSettings()
-
-if existsEnv("PORT"):
-  settings.port = Port(parseInt(getEnv("PORT")))
-
-func index(tags: Table[string, seq[JsonNode]]): string =
+func index(tags: Table[string, seq[Blog]]): string =
   var tagLinks: seq[string]
   for tag in tags.keys:
     tagLinks.add a(href="/tag/" & tag, tag)
@@ -42,17 +45,12 @@ func index(tags: Table[string, seq[JsonNode]]): string =
       header(h1("Open Blog Directory")),
       tagLinks.join("</br>")))
 
-var titles: seq[string]
-for blog in bloglist:
-  titles.add p(blog["name"].getStr)
-
-
-func tagPage(tagname: string, tags: Table[string, seq[JsonNode]]): string =
-  if not tags.contains(tagname):
+func tagPage(tagname: string, tags: Table[string, seq[Blog]]): string =
+  if not (tagname in tags):
     return "no blogs with that tag"
   var blogList: seq[string]
   for blog in tags[tagname]:
-    blogList.add li(a(href=blog["url"].getStr, blog["name"].getStr))
+    blogList.add li(a(href=blog.url, blog.name))
   html(
     head(link(rel="stylesheet", href="https://newcss.net/new.min.css")),
     body(
@@ -60,13 +58,18 @@ func tagPage(tagname: string, tags: Table[string, seq[JsonNode]]): string =
       blogList.join "\n",
   ))
 
+when is_main_module:
+  let blogs = loadBlogs "list.yaml"
+  let tags = makeAndCheckTags(blogs)
 
-routes:
-  get "/":
-    resp index(tags)
-  get "/tag/@tagname":
-    resp tagPage(@"tagname", tags)
-  get "/list.json":
-    resp bloglist
+  var settings = newSettings()
+  if existsEnv "PORT":
+    settings.port = Port(parseInt(getEnv("PORT")))
 
-runForever()
+  routes:
+    get "/":
+      resp index(tags)
+    get "/tag/@tagname":
+      resp tagPage(@"tagname", tags)
+
+  runForever()
