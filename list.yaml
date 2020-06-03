@@ -2,4 +2,7 @@
   url: https://boingboing.net/
   rss: https://boingboing.net/feed
   tags: ["tech", "technology", "futurism", "science fiction", "gadgets", "intellectual property", "Disney"]
-
+- name: Hackaday
+  url: https://hackaday.com/
+  rss: https://hackaday.com/feed
+  tags: ["makers", "hacks", "engineering", "make", "tech"]

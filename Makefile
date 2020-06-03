@@ -1,12 +1,19 @@
 build:
-	nimble build -d:ssl -d:release openblog.nim
+	nimble build -d:ssl
+	echo "✔️ Build succeeded!"
 
 serve: build
 	./openblog
+
+release:
+	nimble build -d:ssl -d:release
 
 heroku:
 	git push heroku master
 	heroku logs --tail
 
+clear:
+	clear
+
 watch:
-	watchmedo shell-command --drop --ignore-directories --patterns="*.nim" --ignore-patterns="*#*" --recursive --command='clear && make --no-print-directory build && echo "✔️ Build succeeded!" && ./openblog' .
+	watchmedo auto-restart --ignore-directories --patterns="*.nim" --ignore-patterns="*#*" --recursive make clear serve

@@ -7,6 +7,9 @@ import strformat
 import FeedNim
 import tables
 import yaml, streams
+import moustachu
+import json
+
 
 type Blog = object
   name: string
@@ -15,15 +18,18 @@ type Blog = object
   tags: seq[string]
 
 proc loadBlogs(filename: string): seq[Blog] =
+  ## parse the yaml list into a seq of `Blog`s
   var yamlStream = newFileStream filename
   yamlStream.load result
   yamlStream.close
 
 proc makeAndCheckTags(blogs: seq[Blog]): Table[string, seq[Blog]] =
+  ## Checks the rss links for each blog makes sense,
+  ## and puts them in a tag lookup table
   var tags = initTable[string, seq[Blog]]()
   echo "checking blog list..."
   for blog in blogs:
-    discard getRSS blog.rss
+    #discard blog.rss.getRSS
 
     for rawTag in blog.tags:
       let tag = rawTag.toLowerAscii.replace(" ", "-")
@@ -34,30 +40,33 @@ proc makeAndCheckTags(blogs: seq[Blog]): Table[string, seq[Blog]] =
   echo fmt"...{blogs.len} blogs loaded!"
   return tags
 
-func index(tags: Table[string, seq[Blog]]): string =
+proc renderPage(pageName: string, context: Context): string =
+  let page = "pages/" & pageName & ".md"
+  page.renderFile(context)
+
+proc indexNew(tags: Table[string, seq[Blog]]): string =
   var tagLinks: seq[string]
   for tag in tags.keys:
-    tagLinks.add a(href="/tag/" & tag, tag)
+    tagLinks.add tag
 
-  html(
-    head(link(rel="stylesheet", href="https://newcss.net/new.min.css")),
-    body(
-      header(h1("Open Blog Directory")),
-      tagLinks.join("</br>")))
+  var context: Context = newContext()
+  context["title"] = "Open Blog Directory"
+  context["tags"] = tagLinks
+  return renderPage("index", context)
 
-func tagPage(tagname: string, tags: Table[string, seq[Blog]]): string =
+proc tagPage(tagname: string, tags: Table[string, seq[Blog]]): string =
   if not (tagname in tags):
     return "no blogs with that tag"
   var blogList: seq[string]
   for blog in tags[tagname]:
-    blogList.add li(a(href=blog.url, blog.name))
-  html(
-    head(link(rel="stylesheet", href="https://newcss.net/new.min.css")),
-    body(
-      header(h1(tagname)),
-      blogList.join "\n",
-  ))
+    blogList.add a(href=blog.url, blog.name)
+  var context: Context = newContext()
+  context["title"] = tagname
+  context["blogs"] = blogList
+  echo context
+  return renderPage("tag", context)
 
+## Set up blogs and tags and start the server
 when is_main_module:
   let blogs = loadBlogs "list.yaml"
   let tags = makeAndCheckTags(blogs)
@@ -68,7 +77,7 @@ when is_main_module:
 
   routes:
     get "/":
-      resp index(tags)
+      resp indexNew(tags)
     get "/tag/@tagname":
       resp tagPage(@"tagname", tags)
 
