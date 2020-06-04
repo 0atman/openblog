@@ -1,23 +1,7 @@
-# nim-heroku-example
+# Open Blog Directory
 
-Example [nim](http://nim-lang.org) app deployed using the [nim heroku buildpack](http://github.com/vic/heroku-buildpack-nim).
+There are many blogrolls, but only one where you are in control of the data. Make a PR with your blog, use the data yourself - it's all open!
 
+# Adding Your Blog
 
-This [example app](http://nim-heroku-example.herokuapp.com) uses the [jester web framework](https://github.com/dom96/jester)
-
-Usage
------
-
-```shell
-
-# Get this example app
-git clone git://github.com/vic/nim-heroku-example.git
-cd nim-heroku-example
-
-# Create a heroku app
-heroku create --stack cedar --buildpack https://github.com/vic/heroku-buildpack-nim.git
-
-# Deploy using development version of Nim
-heroku config:set NIM_BRANCH=devel
-git push heroku master
-```
+You can add your blog by simply making a PR against list.yaml and appending your blog's name, url, rss link, and tags. I will review it and mash merge, after the automated tests pass. I will reject PRs that delete or modify existing blogs in the list.
