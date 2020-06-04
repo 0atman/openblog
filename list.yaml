@@ -6,3 +6,7 @@
   url: https://hackaday.com/
   rss: https://hackaday.com/feed
   tags: ["makers", "hacks", "engineering", "make", "tech"]
+- name: Hacker News
+  url: http://news.ycombinator.com/
+  rss: http://news.ycombinator.com/rss
+  tags: ["tech", "programming", "hacking", "startups"]
