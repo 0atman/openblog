@@ -1,0 +1,22 @@
+<body>
+    <header>
+
+        <a href="https://github.com/nostalgic-css/NES.css" target="_blank" rel="noopener" class="github-link active">
+            <p class="nes-balloon from-right">[add your blog here!]</p>
+        </a>
+        <h1>{{title}}</h1>
+        <p>An independant blogroll of awesome things</p>
+    </header>
+    <section class="nes-container with-title">
+        <h3 class="title">Tags</h3>
+        <div id="texts" class="item">
+            <ul>
+                {{#tags}}
+                <li><a href="/tag/{{.}}">{{.}}</li>
+                {{/tags}}
+            </ul>
+        </div>
+
+    </section>
+
+</body>

@@ -41,8 +41,9 @@ proc makeAndCheckTags(blogs: seq[Blog]): Table[string, seq[Blog]] =
   return tags
 
 proc renderPage(pageName: string, context: Context): string =
-  let page = "pages/" & pageName & ".md"
-  page.renderFile(context)
+  let page = readFile "pages/" & pageName & ".html"
+  let theme = readFile "pages/theme.html"
+  html((theme & page).render(context))
 
 proc indexNew(tags: Table[string, seq[Blog]]): string =
   var tagLinks: seq[string]
@@ -61,7 +62,7 @@ proc tagPage(tagname: string, tags: Table[string, seq[Blog]]): string =
   for blog in tags[tagname]:
     blogList.add a(href=blog.url, blog.name)
   var context: Context = newContext()
-  context["title"] = tagname
+  context["title"] = "OBD Tag: " & tagname
   context["blogs"] = blogList
   echo context
   return renderPage("tag", context)
